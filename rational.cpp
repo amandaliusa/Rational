@@ -7,6 +7,9 @@
 * values for numerator and denominator are set as 0 and 1, respectively. If the
 * denominator is 0, throws exception. If the denominator is negative, inverts
 * sign of numerator and denominator so that the denominator is positive.
+* @param numerator of rational number as integer
+* @param denominator of rational number as integer
+* @return Rational object with specified numerator and denominator
 */
 Rational::Rational(int numerator, int denominator) {
 
@@ -23,28 +26,43 @@ Rational::Rational(int numerator, int denominator) {
     this->denominator = denominator;
 }
 
-/** Returns the numerator of a Rational object. */
+/**
+* Returns the numerator of a Rational object.
+* @param none
+* @return numerator of Rational object that the function is called on as an
+* integer
+*/
 int Rational::num() const {
     return numerator;
 }
 
-/** Returns the denominator of a Rational object. */
+/**
+* Returns the denominator of a Rational object.
+* @param none
+* @return denominator of Rational object that the function is called on as an
+* integer
+*/
 int Rational::denom() const {
     return denominator;
 }
 
 /**
-* Returns Rational object containing reciprocal of the number. Leaves the
-* number itself unchanged. Throws exception if reciprocal has denominator of 0.
+* Takes the reciprocal of a Rational object. Leaves the number itself unchanged.
+* Throws exception if reciprocal has denominator of 0.
+* @param none
+* @return reciprocal of Rational object that the function is called on as a
+* Rational object
 */
 Rational Rational::reciprocal() const {
     return Rational{denominator, numerator};
 }
 
 /**
-* Reduces the rational number that it is called on so that the gcd of the
-* numerator and denominator is 1. If the numerator is 0 and the denominator is
-* not 1, modifies number to 0/1.
+* Reduces a rational number so that the gcd of the numerator and denominator is
+* 1. Mutates the Rational object that the function is called on. If the
+* numerator is 0 and the denominator is not 1, modifies number to 0/1.
+* @param none
+* @return none
 */
 void Rational::reduce() {
     if ((numerator == 0) && (denominator != 1)) {
@@ -58,7 +76,11 @@ void Rational::reduce() {
 }
 
 /**
-* Supports addition of Rationals and assignment in one step. Reduces the result.
+* Supports addition of Rationals and assignment in one step. Modifies the
+* Rational object the function is called on. Reduces the result.
+* @param a Rational object v to be added to the Rational object the function is
+* called on
+* @return reference to modified Rational object that the function is called on
 */
 Rational & Rational::operator+=(const Rational &v) {
     Rational x = Rational{numerator * v.denom() + v.num() * denominator,
@@ -70,8 +92,11 @@ Rational & Rational::operator+=(const Rational &v) {
 }
 
 /**
-* Supports subtraction of Rationals and assignment in one step. Reduces the
-* result.
+* Supports subtraction of Rationals and assignment in one step. Modifies the
+* Rational object the function is called on. Reduces the result.
+* @param a Rational object v to be subtracted from the Rational object the
+* function is called on
+* @return reference to modified Rational object that the function is called on
 */
 Rational & Rational::operator-=(const Rational &v) {
     Rational x = Rational{numerator * v.denom() + v.num() * -1 *
@@ -83,8 +108,11 @@ Rational & Rational::operator-=(const Rational &v) {
 }
 
 /**
-* Supports multiplication of Rationals and assignment in one step. Reduces the
-* result.
+* Supports multiplication of Rationals and assignment in one step. Modifies the
+* Rational object the function is called on. Reduces the result.
+* @param a Rational object v to be multiplied by the Rational object the
+* function is called on
+* @return reference to modified Rational object that the function is called on
 */
 Rational & Rational::operator*=(const Rational &v) {
     Rational x = Rational{numerator * v.num(), denominator * v.denom()};
@@ -95,8 +123,11 @@ Rational & Rational::operator*=(const Rational &v) {
 }
 
 /**
-* Supports division of Rationals and assignment in one step. Reduces the result.
-* Throws exception if Rational being divided by is zero.
+* Supports division of Rationals and assignment in one step. Modifies the
+* Rational object the function is called on. Reduces the result.
+* @param a Rational object v that the Rational object the function is called on
+* is to be divided by
+* @return reference to modified Rational object that the function is called on
 */
 Rational & Rational::operator/=(const Rational &v) {
     if (v.num() == 0) {
@@ -118,20 +149,7 @@ Rational & Rational::operator/=(const Rational &v) {
 * @return sum of two arguments as a Rational object.
 */
 Rational operator+(const Rational &r, const Rational &v) {
-    return Rational{r.num() * v.denom() + v.num() * r.denom(),
-        r.denom() * v.denom()};
-}
-
-/**
-* Multiplies one Rational object by another.
-* @param r first Rational number to be multiplied.
-* @param v second Rational number to be multiplied.
-* @return product of two arguments as a Rational object.
-*/
-Rational operator*(const Rational &r, const Rational &v) {
-    Rational x = Rational{r.num() * v.num(), r.denom() * v.denom()};
-    x.reduce();
-    return x;
+    return Rational{r} += v;
 }
 
 /**
@@ -141,7 +159,17 @@ Rational operator*(const Rational &r, const Rational &v) {
 * @return difference between two arguments as a Rational object.
 */
 Rational operator-(const Rational &r, const Rational &v) {
-    return r + v * -1;
+    return Rational{r} -= v;
+}
+
+/**
+* Multiplies one Rational object by another.
+* @param r first Rational number to be multiplied.
+* @param v second Rational number to be multiplied.
+* @return product of two arguments as a Rational object.
+*/
+Rational operator*(const Rational &r, const Rational &v) {
+    return Rational{r} *= v;
 }
 
 /**
@@ -151,12 +179,15 @@ Rational operator-(const Rational &r, const Rational &v) {
 * @return quotient of two arguments as a Rational object.
 */
 Rational operator/(const Rational &r, const Rational &v) {
-    return r * v.reciprocal();
+    return Rational{r} /= v;
 }
 
 /**
 * Supports stream-output of Rational objects in the form numerator/denominator.
 * If the denominator is 1, outputs numerator only.
+* @param ostream object to contain output
+* @param Rational object to be outputted
+* @return ostream object containing output
 */
 ostream & operator<<(ostream &os, const Rational &r) {
     if (r.denom() == 1) {
